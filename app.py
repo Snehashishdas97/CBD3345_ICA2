@@ -39,7 +39,7 @@ def plot_mandelbrot(xmin, xmax, ymin, ymax, width=800, height=600, max_iter=256)
     ax.set_xlabel('Re')
     ax.set_ylabel('Im')
 
-    # Save the plot to a BytesIO object
+    # In this step, Save the plot to a BytesIO object 
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
