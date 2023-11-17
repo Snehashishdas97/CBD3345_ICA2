@@ -14,7 +14,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Use common steps
-        uses: Snehashishdas97/CustomActions@v4
+        uses: Snehashishdas97/CustomActions@v5
         
   build-and-push:
     runs-on: ubuntu-latest
