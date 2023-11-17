@@ -7,6 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  SERVICE_NAME: my-container  # Specify the service container name
   
 jobs:
   test:
@@ -74,7 +75,7 @@ jobs:
     needs: build-and-push  # This ensures that the integration-test job depends on the completion of the build-and-push job
 
     services:
-      my-container:
+      ${{ env.SERVICE_NAME }}:  # Use the service name from env variable
         image: ghcr.io/snehashishdas97/cbd3345_ica2:main
         ports:
           - 5000:5000
@@ -89,7 +90,7 @@ jobs:
           echo "Service is ready!"
           
       - name: Display service logs
-        run: docker logs my-container
+        run: docker logs ${{ env.SERVICE_NAME }}
       
       - name: Run integration tests
         run: |
