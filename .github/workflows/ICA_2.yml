@@ -17,7 +17,7 @@ jobs:
         uses: Snehashishdas97/CustomActions@v5
         
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: test  # This ensures that the build-and-push job depends on the completion of the test job
 
     steps:
@@ -46,7 +46,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   integration-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-push  # This ensures that the integration-test job depends on the completion of the build-and-push job
 
     services:
