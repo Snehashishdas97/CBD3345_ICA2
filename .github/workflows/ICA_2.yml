@@ -89,8 +89,6 @@ jobs:
           while ! nc -z localhost 5000; do sleep 10; done
           echo "Service is ready!"
           
-      - name: Display service logs
-        run: docker logs my-container
       
       - name: Run integration tests
         run: |
