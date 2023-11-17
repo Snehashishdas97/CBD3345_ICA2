@@ -50,7 +50,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker buildx create --use
-          docker buildx build --push -t ghcr.io/Snehashishdas97/flask_app_ica:latest .
+          docker buildx build --push -t ghcr.io/snehashishdas97/flask_app_ica:latest .
         env:
           DOCKER_BUILDKIT: 1
 
@@ -60,7 +60,7 @@ jobs:
 
     services:
       my-app:
-        image: ghcr.io/Snehashishdas97/flask_app_ica:latest
+        image: ghcr.io/snehashishdas97/flask_app_ica:latest
         ports:
           - 4000:80
 
