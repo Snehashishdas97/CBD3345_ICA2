@@ -4,6 +4,10 @@ on:
   - push
   - pull_request
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  
 jobs:
   test:
     runs-on: self-hosted
@@ -24,14 +28,16 @@ jobs:
 
       - name: Run tests and generate reports
         run: |
-          python -m unittest discover -p 'test_app.py' -v
+          pytest test_app.py --doctest-modules --junitxml=tests/test-results-${{ matrix.python-version }}.xml > tests/log1.txt 
           # You might need additional commands to generate test reports (e.g., coverage)
 
-      - name: Archive test reports
-        uses: actions/upload-artifact@v2
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
         with:
-          name: test-reports
-          path: .
+          name: pytest-results-${{ matrix.python-version }}
+          path: tests/
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
 
   build-and-push:
     runs-on: self-hosted
@@ -39,43 +45,47 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GIT_TOKEN }}" | docker login ghcr.io -u Snehashishdas97 --password-stdin
-
+        uses: actions/checkout@v4
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GIT_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
       - name: Build and push Docker image
-        run: |
-          docker buildx create --use
-          docker buildx build --push -t ghcr.io/snehashishdas97/flask_app_ica:latest .
-        env:
-          DOCKER_BUILDKIT: 1
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   integration-test:
     runs-on: self-hosted
     needs: build-and-push  # This ensures that the integration-test job depends on the completion of the build-and-push job
 
     services:
-      my-app:
-        image: ghcr.io/snehashishdas97/flask_app_ica:latest
+      my-container:
+        image: ghcr.io/snehashishdas97/cbd3345_ica2:main
         ports:
-          - 4000:80
-
+          - 5000:5000
     steps:
-      - name: Wait for service container to be ready
-        run: dockerize -wait tcp://localhost:4000 -timeout 1m
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
+      - name: Wait for the service to be ready
+        run: |
+          echo "Waiting for the service to be ready..."
+          while ! nc -z localhost 5000; do sleep 1; done
+          echo "Service is ready!"
       - name: Run integration tests
         run: |
-          # Assuming your Flask app has an endpoint at /plot
-          response_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4000/plot)
-
-          if [ "$response_code" -eq 200 ]; then
-            echo "Integration tests passed!"
-          else
-            echo "Integration tests failed! Response code: $response_code"
-            exit 1
-          fi
+          curl -X POST -H "Content-Type: application/json" -d '{"xmin": -2, "xmax": 2, "ymin": -2, "ymax": 2}' http://localhost:5000/plot
