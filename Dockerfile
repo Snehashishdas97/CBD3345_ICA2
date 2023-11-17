@@ -1,20 +1,12 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8
+FROM python:3.8-slim-buster
 
-# Set the working directory to /app
-WORKDIR /app
+WORKDIR /python-docker
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Install Flask, numpy, and matplotlib
 RUN pip install --no-cache-dir Flask numpy matplotlib
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+COPY . .
 
 # Define environment variable
 ENV NAME World
 
-# Run app.py when the container launches
-CMD ["python", "app.py"]
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
