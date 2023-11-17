@@ -75,7 +75,7 @@ jobs:
     needs: build-and-push  # This ensures that the integration-test job depends on the completion of the build-and-push job
 
     services:
-      ${{ env.SERVICE_NAME }}:  # Use the service name from env variable
+      my-container:
         image: ghcr.io/snehashishdas97/cbd3345_ica2:main
         ports:
           - 5000:5000
@@ -90,7 +90,7 @@ jobs:
           echo "Service is ready!"
           
       - name: Display service logs
-        run: docker logs ${{ env.SERVICE_NAME }}
+        run: docker logs my-container
       
       - name: Run integration tests
         run: |
