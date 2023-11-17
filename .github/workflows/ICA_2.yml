@@ -89,7 +89,7 @@ jobs:
           echo "Service is ready!"
           
       - name: Display service logs
-        run: docker logs cbd3345_ica2
+        run: docker logs my-container
       
       - name: Run integration tests
         run: |
