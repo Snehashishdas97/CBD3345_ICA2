@@ -87,6 +87,10 @@ jobs:
           echo "Waiting for the service to be ready..."
           while ! nc -z localhost 5000; do sleep 10; done
           echo "Service is ready!"
+          
+      - name: Display service logs
+        run: docker logs cbd3345_ica2
+      
       - name: Run integration tests
         run: |
           curl -X POST -H "Content-Type: application/json" -d '{"xmin": -2, "xmax": 2, "ymin": -2, "ymax": 2}' http://localhost:5000/plot
